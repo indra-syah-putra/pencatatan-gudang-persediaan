@@ -151,6 +151,6 @@ routes/auth.php                          # Route auth (register, forgot password
 - **DomPDF** — Cetak laporan PDF
 - **Font Awesome 6** — Icon
 
-## Lisensi
+## License
 
-MIT
+[MIT](LICENSE)
