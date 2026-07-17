@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>@yield('title', 'ERP PT. Jaya Raya')</title>
+    <title>@yield('title', 'ERP ' . company('name'))</title>
 
     @yield('meta')
 
@@ -35,7 +35,7 @@
                         @endif
                     </div>
                     <div class="hidden md:block">
-                        <h1 class="text-lg font-bold text-slate-900 leading-none">JAYA RAYA</h1>
+                        <h1 class="text-lg font-bold text-slate-900 leading-none">{{ strtoupper(str_replace('PT. ', '', company('name'))) }}</h1>
                         <p class="text-[10px] text-slate-500 font-semibold uppercase">ERP System</p>
                     </div>
                 </div>

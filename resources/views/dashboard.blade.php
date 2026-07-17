@@ -70,7 +70,7 @@
                 <tbody class="divide-y divide-slate-100 bg-white">
                     @forelse ($barangs as $item)
                         @php
-                            $currentStock = $item->persediaan->quantity ?? 0;
+                            $currentStock = $item->persediaan?->quantity ?? 0;
                             $isLow = $currentStock <= $item->min_stock;
                         @endphp
 

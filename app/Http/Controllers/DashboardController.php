@@ -11,7 +11,7 @@ class DashboardController extends Controller
     {
         $totalItems = Barang::count();
         $barangs = Barang::with('persediaan')->latest()->get();
-        $lowStockCount = $barangs->filter(fn($item) => ($item->persediaan->quantity ?? 0) <= $item->min_stock)->count();
+        $lowStockCount = $barangs->filter(fn($item) => ($item->persediaan?->quantity ?? 0) <= $item->min_stock)->count();
 
         return view('dashboard', compact('barangs', 'totalItems', 'lowStockCount'));
     }

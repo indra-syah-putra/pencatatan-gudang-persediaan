@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Transaksi;
 use App\Models\Barang;
 use App\Models\Persediaan;
@@ -24,32 +25,40 @@ class TransaksiController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $barang = Barang::find($validated['product_id']);
-        $totalPrice = $barang->price_per_unit * $validated['quantity'];
+        return DB::transaction(function () use ($validated) {
+            $barang = Barang::find($validated['product_id']);
+            $totalPrice = $barang->price_per_unit * $validated['quantity'];
 
-        Transaksi::create([
-            'transaction_date' => $validated['transaction_date'],
-            'transaction_type' => $validated['transaction_type'],
-            'product_id' => $validated['product_id'],
-            'quantity' => $validated['quantity'],
-            'total_price' => $totalPrice,
-        ]);
+            $persediaan = Persediaan::firstOrNew(
+                ['product_id' => $validated['product_id']]
+            );
 
-        $persediaan = Persediaan::firstOrCreate(
-            ['product_id' => $validated['product_id']],
-            ['quantity' => 0, 'warehouse_location' => 'Gudang Utama', 'entry_date' => now()]
-        );
-
-        if ($validated['transaction_type'] == 'in') {
-            $persediaan->quantity += $validated['quantity'];
-        } else {
-            if ($persediaan->quantity < $validated['quantity']) {
-                return back()->with('error', 'Stok tidak mencukupi!');
+            if ($validated['transaction_type'] == 'out') {
+                if (($persediaan->quantity ?? 0) < $validated['quantity']) {
+                    return back()->with('error', 'Stok tidak mencukupi!');
+                }
+                $persediaan->quantity -= $validated['quantity'];
+            } else {
+                $persediaan->quantity = ($persediaan->quantity ?? 0) + $validated['quantity'];
             }
-            $persediaan->quantity -= $validated['quantity'];
-        }
-        $persediaan->save();
 
-        return redirect()->route('dashboard')->with('success', 'Transaksi berhasil disimpan.');
+            if (!$persediaan->exists) {
+                $persediaan->fill([
+                    'warehouse_location' => 'Gudang Utama',
+                    'entry_date' => now(),
+                ]);
+            }
+            $persediaan->save();
+
+            Transaksi::create([
+                'transaction_date' => $validated['transaction_date'],
+                'transaction_type' => $validated['transaction_type'],
+                'product_id' => $validated['product_id'],
+                'quantity' => $validated['quantity'],
+                'total_price' => $totalPrice,
+            ]);
+
+            return redirect()->route('dashboard')->with('success', 'Transaksi berhasil disimpan.');
+        });
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Models\Barang;
 
 class BarangController extends Controller
@@ -45,7 +46,7 @@ class BarangController extends Controller
         $barang = Barang::findOrFail($id);
         
         $validated = $request->validate([
-            'code' => 'nullable|string|max:100|unique:barangs,code,'.$barang->id,
+            'code' => ['nullable', 'string', 'max:100', Rule::unique('barangs', 'code')->ignore($barang->id)->withoutTrashed()],
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
             'unit_of_measure' => 'required|string|max:50',

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('persediaans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained('barangs')->onDelete('cascade');
+            $table->foreignId('product_id')->unique()->constrained('barangs')->onDelete('cascade');
             $table->integer('quantity');
             $table->string('warehouse_location')->default('Gudang A');
             $table->date('entry_date');
